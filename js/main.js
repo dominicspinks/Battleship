@@ -117,6 +117,7 @@ class playerTile {
                 size: 5,
                 destroyed: false,
                 placed: false,
+                orientation: 'h',
             },
             {
                 id: 1,
@@ -124,6 +125,7 @@ class playerTile {
                 size: 4,
                 destroyed: false,
                 placed: false,
+                orientation: 'h',
             },
             {
                 id: 2,
@@ -131,6 +133,7 @@ class playerTile {
                 size: 3,
                 destroyed: false,
                 placed: false,
+                orientation: 'h',
             },
             {
                 id: 3,
@@ -138,8 +141,16 @@ class playerTile {
                 size: 3,
                 destroyed: false,
                 placed: false,
+                orientation: 'h',
             },
-            { id: 4, name: 'Patrol', size: 2, destroyed: false, placed: false },
+            {
+                id: 4,
+                name: 'Patrol',
+                size: 2,
+                destroyed: false,
+                placed: false,
+                orientation: 'h',
+            },
         ];
 
         // Define cells in the game board
@@ -179,20 +190,64 @@ class BattleshipGame {
         // Listener for the hover
         // Listener for the click
         this.playerTileElement.addEventListener('click', (event) => {
-            const cellElementIndex = this.human.boardCellsElement.indexOf(
-                event.target
-            );
-            const cell = this.human.boardCells[cellElementIndex];
+            event.preventDefault();
+            // If the game is in stage 2, the playerTileElement cannot be clicked
+            if (this.gameStage === 2) {
+                return;
+            }
+
+            const cellNum = this.human.boardCellsElement.indexOf(event.target);
+            const cell = this.human.boardCells[cellNum];
 
             if (!cell || cell.value !== null || this.winner) {
                 return;
             }
 
             // Get current ship
-            const ship = getCurrentShip(human.ships);
+            const ship = this.getCurrentShip(this.human.ships);
+
             // Validate if ship can fit in cell
+            if (
+                !this.validateCellForShip(this.human.boardCells, cellNum, ship)
+            ) {
+                return;
+            }
+            console.log('placing ship');
+            // Place ship
+            this.placeShip(this.human.boardCells, cellNum, ship);
+
+            // Check if it was the last ship to be placed
+            if (
+                this.human.ships.indexOf(ship) ===
+                this.human.ships.length - 1
+            ) {
+                this.gameStage = 2;
+            }
+            this.render();
         });
         // Listener for the right click
+        this.playerTileElement.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            // If the game is in stage 2, the right click does nothing
+            if (this.gameStage === 2) {
+                return;
+            }
+
+            // Switch the orientation of the current ship
+            // Get current ship
+            const ship = this.getCurrentShip(this.human.ships);
+
+            console.log(`Before switch: `, ship.orientation);
+            ship.orientation = ship.orientation === 'h' ? 'v' : 'h';
+            console.log(`After switch: `, ship.orientation);
+        });
+    }
+
+    getCurrentShip(ships) {
+        // Gets the first ship from the array that has not been placed
+        // (where ship.placed === false)
+        // Returns the ship object
+        return ships.find((ship) => !ship.placed);
     }
 
     play() {
@@ -217,17 +272,12 @@ class BattleshipGame {
 
         this.computer.ships.forEach((ship) => {
             // pick random orientation
-            const orientation = Math.floor(Math.random() * 2); // 0 = horizontal, 1 = vertical
+            ship.orientation = Math.floor(Math.random() * 2) === 0 ? 'h' : 'v'; // 0 = horizontal, 1 = vertical
             let cellNum = Math.floor(Math.random() * 100);
             // get cell for boat placement
             while (true) {
                 if (
-                    this.validateCellForShip(
-                        computerBoardCells,
-                        cellNum,
-                        ship.size,
-                        orientation
-                    )
+                    this.validateCellForShip(computerBoardCells, cellNum, ship)
                 ) {
                     break;
                 }
@@ -239,9 +289,9 @@ class BattleshipGame {
             }
 
             // place boat
-            this.placeShip(computerBoardCells, cellNum, ship, orientation);
+            this.placeShip(computerBoardCells, cellNum, ship);
         });
-        this.tmpPrintValues(computerBoardCells);
+        // this.tmpPrintValues(computerBoardCells);
         this.render();
     }
 
@@ -253,11 +303,11 @@ class BattleshipGame {
         });
     }
 
-    placeShip(playerBoard, cellNum, ship, shipOrientation) {
+    placeShip(playerBoard, cellNum, ship) {
         // Takes the playerBoard, cell selection, ship object and ship orientation as inputs
         // It assumes the ship is ok to be placed (validation has occurred already)
         for (let i = 0; i < ship.size; i++) {
-            if (shipOrientation) {
+            if (ship.orientation === 'v') {
                 // Vertical
                 // playerBoard[cellNum]
                 playerBoard[cellNum + i * 10].value = ship.id;
@@ -266,9 +316,10 @@ class BattleshipGame {
                 playerBoard[cellNum + i].value = ship.id;
             }
         }
+        ship.placed = true;
     }
 
-    validateCellForShip(playerBoard, cellNum, shipLength, shipOrientation) {
+    validateCellForShip(playerBoard, cellNum, ship) {
         // Takes the playerBoard, cell selection, ship length and ship orientation as inputs
         // It will check if the selected cell is free, if not return false
         // It will validate if the ship can fit in the selected space
@@ -280,10 +331,11 @@ class BattleshipGame {
             return false;
         }
 
-        if (shipOrientation) {
+        console.log(playerBoard[cellNum].value);
+        if (ship.orientation === 'v') {
             // check for vertical fit (no ships in the way)
             // check for vertical obstruction (other ships in the way)
-            for (let i = 1; i < shipLength; i++) {
+            for (let i = 1; i < ship.size; i++) {
                 if (
                     cellRow + i > 9 ||
                     playerBoard[cellNum + i * 10].value !== null
@@ -294,7 +346,7 @@ class BattleshipGame {
         } else {
             // check for horizontal fit (no ships in the way)
             // check for horizontal obstruction (other ships in the way)
-            for (let i = 1; i < shipLength; i++) {
+            for (let i = 1; i < ship.size; i++) {
                 if (
                     cellColumn + i > 9 ||
                     playerBoard[cellNum + i].value !== null
