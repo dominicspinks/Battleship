@@ -97,9 +97,19 @@ class Cell {
 
     render() {
         if (this.value !== null) {
-            this.cellElement.innerHTML = '&#x2022;';
+            // this.cellElement.innerHTML = '&#x2022;';
         }
         this.cellElement.style.backgroundColor = Cell.renderLookup[this.value];
+    }
+
+    renderHighlight(valid) {
+        if (valid) {
+            // Render cell to show a ship can go in this cell
+            this.cellElement.style.backgroundColor = '#777';
+        } else {
+            // Render cell to show a ship cannot be placed in this cell
+            this.cellElement.style.backgroundColor = 'red';
+        }
     }
 }
 
@@ -177,22 +187,74 @@ class playerTile {
 
 class BattleshipGame {
     constructor(gameElement) {
+        // Cache HTML elements
         this.playerTileElement = game.querySelector('#player');
         this.computerTileElement = game.querySelector('#computer');
+        this.buttonResetElement = game.querySelector('#button-reset');
+        this.buttonStartElement = game.querySelector('#button-start');
+
+        // Generate player tiles
         this.human = new playerTile(this.playerTileElement);
         this.computer = new playerTile(this.computerTileElement);
 
+        // Initialise listeners
         this.addListeners();
     }
 
     addListeners() {
-        // Listener for the button
-        // Listener for the hover
-        // Listener for the click
+        // Listener for the Reset Button
+        this.buttonResetElement.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // This is added to stop cases of double actions on the button
+
+            // This button will reinitialise the board
+            console.log(event);
+            if (
+                confirm('This will start a new game. Do you want to continue?')
+            ) {
+                initialise();
+            } else {
+                return;
+            }
+        });
+
+        // Listener for the Start Button
+        this.buttonStartElement.addEventListener('click', (event) => {
+            event.preventDefault();
+            // This button will appear after all player ships have been placed
+            // Clicking will begin stage 2 of the game
+            this.gameStage = 2;
+            this.render();
+        });
+
+        // Listener for the hover on player tile
+        this.playerTileElement.addEventListener('mouseover', (event) => {
+            event.preventDefault();
+            // If the game is in stage 2, hovering over playerTileElement does nothing
+            if (this.gameStage !== 0) {
+                return;
+            }
+
+            const cellNum = this.human.boardCellsElement.indexOf(event.target);
+            const cells = this.human.boardCells;
+            const cell = cells[cellNum];
+
+            // If target is not the cells, call the main render again to clear any highlights
+            if (!cell || cell.value !== null || this.winner) {
+                this.render();
+                return;
+            }
+
+            this.validateShipPreview(cells, cellNum);
+        });
+
+        // Listener for the click on player tile
         this.playerTileElement.addEventListener('click', (event) => {
             event.preventDefault();
-            // If the game is in stage 2, the playerTileElement cannot be clicked
-            if (this.gameStage === 2) {
+            event.stopImmediatePropagation();
+            // If the game is in stage 1 or 2, the playerTileElement cannot be clicked
+            if (this.gameStage !== 0) {
                 return;
             }
 
@@ -212,7 +274,6 @@ class BattleshipGame {
             ) {
                 return;
             }
-            console.log('placing ship');
             // Place ship
             this.placeShip(this.human.boardCells, cellNum, ship);
 
@@ -221,26 +282,65 @@ class BattleshipGame {
                 this.human.ships.indexOf(ship) ===
                 this.human.ships.length - 1
             ) {
-                this.gameStage = 2;
+                this.gameStage = 1;
             }
             this.render();
         });
-        // Listener for the right click
+
+        // Listener for the right click on player tile
         this.playerTileElement.addEventListener('contextmenu', (event) => {
             event.preventDefault();
+            event.stopImmediatePropagation();
             // If the game is in stage 2, the right click does nothing
             if (this.gameStage === 2) {
                 return;
             }
 
             // Switch the orientation of the current ship
-            // Get current ship
             const ship = this.getCurrentShip(this.human.ships);
-
-            console.log(`Before switch: `, ship.orientation);
+            console.log(ship);
+            console.log(ship.orientation);
             ship.orientation = ship.orientation === 'h' ? 'v' : 'h';
-            console.log(`After switch: `, ship.orientation);
+
+            // Call the hover/highlist process to handle right clicking while hovering
+            const cells = this.human.boardCells;
+            const cellNum = this.human.boardCellsElement.indexOf(event.target);
+
+            this.validateShipPreview(cells, cellNum);
         });
+    }
+
+    validateShipPreview(cells, cellNum) {
+        // If the target is the player cells, render the cells based on the current ship
+        // Get current ship
+        const ship = this.getCurrentShip(this.human.ships);
+
+        // Check if the ship will fit
+        const valid = this.validateCellForShip(
+            this.human.boardCells,
+            cellNum,
+            ship
+        );
+
+        // Render ship on relevant cells
+        this.renderShipPreview(cells, cellNum, ship, valid);
+    }
+
+    renderShipPreview(boardCells, startingCell, ship, valid) {
+        // Render the full board (to remove any previous highlights)
+        this.human.render();
+
+        const startingCol = startingCell % 10;
+        const startingRow = Math.floor(startingCell / 10);
+
+        // Render each cell that will be covered by the ship
+        for (let i = 0; i < ship.size; i++) {
+            if (startingRow + i < 10 && ship.orientation === 'v') {
+                boardCells[startingCell + i * 10].renderHighlight(valid);
+            } else if (startingCol + i < 10 && ship.orientation === 'h') {
+                boardCells[startingCell + i].renderHighlight(valid);
+            }
+        }
     }
 
     getCurrentShip(ships) {
@@ -253,7 +353,7 @@ class BattleshipGame {
     play() {
         this.turn = 1; // change to randomised first player
         this.winner = null;
-        this.gameStage = 0;
+        this.gameStage = 0; // 0 = starting, 1 = players ships placed, 2 = guessing stage
 
         this.computerInit();
         this.render();
@@ -331,7 +431,6 @@ class BattleshipGame {
             return false;
         }
 
-        console.log(playerBoard[cellNum].value);
         if (ship.orientation === 'v') {
             // check for vertical fit (no ships in the way)
             // check for vertical obstruction (other ships in the way)
@@ -363,6 +462,26 @@ class BattleshipGame {
 
         this.human.render();
         this.computer.render();
+        this.renderStartButton();
+        this.renderComputerTile();
+    }
+
+    renderStartButton() {
+        // Display after player places all ships
+        if (this.gameStage === 1) {
+            this.buttonStartElement.style.removeProperty('display');
+        } else {
+            this.buttonStartElement.style.display = 'none';
+        }
+    }
+
+    renderComputerTile() {
+        // Hide if game setup in progress
+        if (this.gameStage === 2) {
+            this.computerTileElement.style.removeProperty('display');
+        } else {
+            this.computerTileElement.style.display = 'none';
+        }
     }
 }
 
