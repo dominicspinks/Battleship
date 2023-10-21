@@ -1,0 +1,56 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    /* Variables */
+}
+
+body {
+    background-color: grey;
+}
+
+.tile {
+    width: 50vmin;
+    height: 60vmin;
+    display: grid;
+    gap: 5px;
+    background-color: white;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 10fr 1fr;
+    border: 2px solid black;
+    margin: 10px;
+}
+
+.tile-header {
+    border: 1px solid black;
+    border-bottom-width: 2px;
+}
+
+.tile-board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    width: 100%;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.tile-board > div {
+    border: 1px solid black;
+}
+
+.tile-ships {
+    display: grid;
+    grid-template-columns: 5fr 4fr 3fr 3fr 2fr;
+    grid-template-rows: 1fr;
+}
+
+.tile-ships > div {
+    border: 1px solid black;
+    border-top-width: 2px;
+}
+
+#computer {
+    display: none;
+}
