@@ -2,17 +2,17 @@
     box-sizing: border-box;
 }
 
-:root {
-    /* Variables */
-}
+/* :root {
+    Variables
+} */
 
 body {
     background-color: grey;
 }
 
 .tile {
-    width: 50vmin;
-    height: 60vmin;
+    width: 40vmin;
+    height: 48vmin;
     display: grid;
     gap: 5px;
     background-color: white;
@@ -45,15 +45,12 @@ body {
 
 .tile-ships {
     display: grid;
-    grid-template-columns: 5fr 4fr 3fr 3fr 2fr;
+    grid-template-columns: repeat(5, 1fr);
     grid-template-rows: 1fr;
     border: 1px solid black;
 }
 
 .tile-ships > div {
     border: 1px solid black;
-}
-
-#computer {
-    /* display: none; */
+    font-size: 1.5vmin;
 }

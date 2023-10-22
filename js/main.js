@@ -1,3 +1,11 @@
+/**
+ * To Do:
+ * - Reset button reinitialisation process
+ * - CSS Styles
+ * - Add ship images to the ship sections
+ * - Stage 2 gameplay
+ */
+
 // Stage 1: Player places their pieces
 // Initialise empty board
 // Player will hover mouse over the board and it will highlight the cells the boat will go in
@@ -92,7 +100,13 @@ class Cell {
         '1': '#474747',
         '2': '#463838',
         '3': '#3c4638',
-        '4': '#433846'
+        '4': '#433846',
+        '5': '#433846',
+        '-1': 'grey',
+        '-2': 'grey',
+        '-3': 'grey',
+        '-4': 'grey',
+        '-5': 'grey',
     }
 
     render() {
@@ -122,7 +136,7 @@ class playerTile {
         this.tileShipsElement = playerTileElement.querySelector('.tile-ships');
         this.ships = [
             {
-                id: 0,
+                id: 1,
                 name: 'Carrier',
                 size: 5,
                 destroyed: false,
@@ -130,7 +144,7 @@ class playerTile {
                 orientation: 'h',
             },
             {
-                id: 1,
+                id: 2,
                 name: 'Battleship',
                 size: 4,
                 destroyed: false,
@@ -138,7 +152,7 @@ class playerTile {
                 orientation: 'h',
             },
             {
-                id: 2,
+                id: 3,
                 name: 'Destroyer',
                 size: 3,
                 destroyed: false,
@@ -146,7 +160,7 @@ class playerTile {
                 orientation: 'h',
             },
             {
-                id: 3,
+                id: 4,
                 name: 'Submarine',
                 size: 3,
                 destroyed: false,
@@ -154,7 +168,7 @@ class playerTile {
                 orientation: 'h',
             },
             {
-                id: 4,
+                id: 5,
                 name: 'Patrol',
                 size: 2,
                 destroyed: false,
@@ -177,11 +191,47 @@ class playerTile {
         ];
     }
 
-    render() {
+    render(gameStage) {
         // (after debugging done, dont render ship positions on computer board)
-        // Add &#x2022; character to each div that has a boat in it
+        // Render main cells
         this.boardCells.forEach((cell) => cell.render());
-        // Add colour to each div based on the boat
+
+        // Render ship section
+        switch (gameStage) {
+            case 0:
+            case 1:
+                for (let i = 0; i < this.shipCellsElement.length; i++) {
+                    this.shipCellsElement[
+                        i
+                    ].innerHTML = `<h4>${this.ships[i].name}</h4>`;
+                    this.shipCellsElement[i].style.removeProperty('border');
+                    if (this.ships[i].placed) {
+                        this.shipCellsElement[i].style.background = '#EEE';
+                    }
+                }
+
+                const currentShipIndex = this.ships.findIndex(
+                    (ship) => !ship.placed
+                );
+                if (currentShipIndex !== -1) {
+                    this.shipCellsElement[currentShipIndex].style.border =
+                        '1px solid red';
+                }
+                break;
+            case 2:
+                for (let i = 0; i < this.shipCellsElement.length; i++) {
+                    this.shipCellsElement[
+                        i
+                    ].innerHTML = `<h4>${this.ships[i].name}</h4>`;
+                    this.shipCellsElement[i].style.removeProperty('border');
+                    if (this.ships[i].destroyed) {
+                        this.shipCellsElement[i].style.background = 'grey';
+                    } else {
+                        this.shipCellsElement[i].style.background = 'white';
+                    }
+                }
+                break;
+        }
     }
 }
 
@@ -209,11 +259,10 @@ class BattleshipGame {
             // This is added to stop cases of double actions on the button
 
             // This button will reinitialise the board
-            console.log(event);
             if (
                 confirm('This will start a new game. Do you want to continue?')
             ) {
-                initialise();
+                this.reinitialise();
             } else {
                 return;
             }
@@ -231,6 +280,7 @@ class BattleshipGame {
         // Listener for the hover on player tile
         this.playerTileElement.addEventListener('mouseover', (event) => {
             event.preventDefault();
+            event.stopImmediatePropagation();
             // If the game is in stage 2, hovering over playerTileElement does nothing
             if (this.gameStage !== 0) {
                 return;
@@ -298,8 +348,6 @@ class BattleshipGame {
 
             // Switch the orientation of the current ship
             const ship = this.getCurrentShip(this.human.ships);
-            console.log(ship);
-            console.log(ship.orientation);
             ship.orientation = ship.orientation === 'h' ? 'v' : 'h';
 
             // Call the hover/highlist process to handle right clicking while hovering
@@ -308,6 +356,240 @@ class BattleshipGame {
 
             this.validateShipPreview(cells, cellNum);
         });
+
+        // Listener for the hover on computer tile
+        this.computerTileElement.addEventListener('mouseover', (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // Do nothing during stages 0 and 1 or if it is the computer's turn
+            if (
+                this.gameStage !== 2 ||
+                this.turn === -1 ||
+                this.winner !== null
+            ) {
+                return;
+            }
+
+            const cellNum = this.computer.boardCellsElement.indexOf(
+                event.target
+            );
+            const cells = this.computer.boardCells;
+            const cell = cells[cellNum];
+
+            // If target is not the cells, call the main render again to clear any highlights
+            this.render();
+            if (!cell || cell.value !== null || this.winner) {
+                return;
+            }
+            const valid = this.validateCellGuess(cell);
+            console.log(valid);
+
+            cell.renderHighlight(valid);
+        });
+
+        // Listener for the click on computer tile
+        this.computerTileElement.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            // Do nothing during stages 0 and 1 or if it is the computer's turn
+            if (this.gameStage !== 2 || this.turn === -1) {
+                return;
+            }
+
+            const cellNum = this.computer.boardCellsElement.indexOf(
+                event.target
+            );
+            const cells = this.computer.boardCells;
+            const cell = cells[cellNum];
+
+            // Check if cell can be clicked, if not do nothing
+            if (!this.validateCellGuess(cell)) {
+                return;
+            }
+
+            // Update selected cell
+            this.makeGuess(cell);
+
+            // Validate if there are any ships left
+            if (this.validateShips(cells, this.computer.ships)) {
+                // Game is over
+                this.winner = this.turn;
+                this.render();
+                return;
+            }
+
+            // Change player turn
+            this.turn *= -1;
+            this.render();
+
+            // Call next playercellNum
+            this.computerGuess();
+        });
+    }
+
+    tmpPrintCellValues(playerCells) {
+        playerCells.forEach((cell) => {
+            if (cell.value !== null) {
+                console.log(cell.value);
+            }
+        });
+    }
+
+    getComputerGuess(playerCells, playerShips) {
+        // for each ship id of non destroyed ships, count the number of times its negative appears in the playerCells
+        // If all are 0, make a random guess
+        // If one is less than the size of the boat, determine the next guess based on that cell
+        // - if the count is one, make a random selection either up/down/left/right from that cell
+        //   - This will take into account the other positions on the board (only null cells and checking for edges of the board)
+        // - if the count is 2 or more, use the existing values to determine the ship's orientation (or should I just use the orientation value?)
+        // - Make the guess on the next horizontal/vertical cell based on the orientation
+
+        // Ignore ships that are already destroyed
+        for (let ship of playerShips.filter((ship) => !ship.destroyed)) {
+            // Find ships that have been partially destroyed
+            const hitCells = playerCells.filter(
+                (cell) => cell.value === -ship.id
+            );
+
+            // Handle case where one cell on the ship has been hit
+            // Check the cells around the cell for obstructions (edges or other ships)
+            const startCellIndex = playerCells.findIndex(
+                (cell) => cell === hitCells[0]
+            );
+            const endCellIndex = playerCells.findIndex(
+                (cell) => cell === hitCells[hitCells.length - 1]
+            );
+            // Create an array of the cells the computer can pick from
+            const availableCells = [];
+            // If hitCells > 1, the computer know what the orientation is
+            // eg if it is vertical, it only guesses from above or below
+            // Check in the row above
+            if (
+                (hitCells.length === 1 ||
+                    (hitCells.length > 1 && ship.orientation === 'v')) &&
+                startCellIndex - 10 > 0 &&
+                (playerCells[startCellIndex - 10].value === null ||
+                    playerCells[startCellIndex - 10].value > 0)
+            ) {
+                availableCells.push(playerCells[startCellIndex - 10]);
+            }
+            // Check in the row below
+            if (
+                (hitCells.length === 1 ||
+                    (hitCells.length > 1 && ship.orientation === 'v')) &&
+                endCellIndex + 10 < 100 &&
+                (playerCells[endCellIndex + 10].value === null ||
+                    playerCells[endCellIndex + 10].value > 0)
+            ) {
+                availableCells.push(playerCells[endCellIndex + 10]);
+            }
+            // Check in the column to the left
+            if (
+                (hitCells.length === 1 ||
+                    (hitCells.length > 1 && ship.orientation === 'h')) &&
+                startCellIndex - 1 >= 0 &&
+                (startCellIndex - 1) % 10 < 9 &&
+                (playerCells[startCellIndex - 1].value === null ||
+                    playerCells[startCellIndex - 1].value > 0)
+            ) {
+                availableCells.push(playerCells[startCellIndex - 1]);
+            }
+            // Check in the column to the right
+            if (
+                (hitCells.length === 1 ||
+                    (hitCells.length > 1 && ship.orientation === 'h')) &&
+                endCellIndex + 1 < 100 &&
+                (endCellIndex + 1) % 10 > 0 &&
+                (playerCells[endCellIndex + 1].value === null ||
+                    playerCells[endCellIndex + 1].value > 0)
+            ) {
+                availableCells.push(playerCells[endCellIndex + 1]);
+            }
+            console.log(availableCells);
+            if (availableCells.length > 0) {
+                return availableCells[
+                    Math.floor(Math.random() * availableCells.length)
+                ];
+            }
+        }
+        // Eliminate cells that are impossible to fit a boat
+        this.eliminateCells(playerCells, playerShips);
+
+        // No ships are partially hit, make a random guess from remaining cells
+        const remainingCells = playerCells.filter(
+            (cell) => cell.value === null || cell.value > 0
+        );
+        return remainingCells[
+            Math.floor(Math.random() * remainingCells.length)
+        ];
+    }
+
+    computerGuess() {
+        const cells = this.human.boardCells;
+        const ships = this.human.ships;
+
+        const cell = this.getComputerGuess(cells, ships);
+
+        // Update selected cell
+        this.makeGuess(cell);
+
+        // Validate if there are any ships left
+        if (this.validateShips(cells, ships)) {
+            // Game is over
+            this.winner = this.turn;
+            this.render();
+            return;
+        }
+
+        // Change player turn
+        this.turn *= -1;
+        this.render();
+    }
+
+    eliminateCells(playerCells, playerShips) {
+        // this will automatically mark any cells that cannot fit any of the remaining ships
+        // eg, if a cell is surround on all sides, it cannot fit a boat and the computer should not pick from it
+    }
+    validateShips(playerCells, playerShips) {
+        // Check the ships for the given player to see which are sunk
+        playerShips.forEach((ship) => {
+            // this.tmpPrintCellValues(playerCells);
+            if (
+                playerCells.findIndex((cell) => cell.value === +ship.id) === -1
+            ) {
+                // Ship is sunk
+                ship.destroyed = true;
+            }
+        });
+
+        // Check if all ships are destroyed
+        if (playerShips.findIndex((ship) => ship.destroyed === false) === -1) {
+            // No ships are left
+            return true;
+        } else {
+            // Ships are left
+            return false;
+        }
+    }
+
+    makeGuess(cellGuess) {
+        // Update the cell value and return true if it was a hit
+        if (cellGuess.value === null) {
+            // Set the cell as a miss
+            cellGuess.value = 0;
+            return false;
+        } else if (cellGuess.value > 0) {
+            // Set the cell as a hit
+            cellGuess.value *= -1;
+            return true;
+        }
+        return false;
+    }
+
+    validateCellGuess(cell) {
+        // Determines if the input cell is valid to be guessed
+        return cell.value === null || cell.value > 0;
     }
 
     validateShipPreview(cells, cellNum) {
@@ -328,7 +610,7 @@ class BattleshipGame {
 
     renderShipPreview(boardCells, startingCell, ship, valid) {
         // Render the full board (to remove any previous highlights)
-        this.human.render();
+        this.human.render(this.gamestage);
 
         const startingCol = startingCell % 10;
         const startingRow = Math.floor(startingCell / 10);
@@ -381,26 +663,17 @@ class BattleshipGame {
                 ) {
                     break;
                 }
-                if (cellNum > 96) {
-                    cellNum = 0;
-                } else {
-                    cellNum += 3;
+                cellNum += 23;
+                if (cellNum > 99) {
+                    cellNum -= 100;
                 }
             }
 
             // place boat
             this.placeShip(computerBoardCells, cellNum, ship);
         });
-        // this.tmpPrintValues(computerBoardCells);
-        this.render();
-    }
 
-    tmpPrintValues(playerBoard) {
-        playerBoard.forEach((cell, idx) => {
-            if (cell.value !== null) {
-                console.log(`cellNum: ${idx}, Value: ${cell.value}`);
-            }
-        });
+        this.render();
     }
 
     placeShip(playerBoard, cellNum, ship) {
@@ -458,12 +731,17 @@ class BattleshipGame {
     }
 
     render() {
-        //if gamestage = 0, computer board is hidden
+        // Render the player's board
+        this.human.render(this.gameStage);
 
-        this.human.render();
-        this.computer.render();
+        // Render the computer's board
+        this.computer.render(this.gameStage);
+
+        // Control when the start button is visible
         this.renderStartButton();
-        this.renderComputerTile();
+
+        // Control when computer tile is visible
+        // this.renderComputerTile();
     }
 
     renderStartButton() {
@@ -483,6 +761,8 @@ class BattleshipGame {
             this.computerTileElement.style.display = 'none';
         }
     }
+
+    reinitialise() {}
 }
 
 function initialise() {
