@@ -2,12 +2,30 @@
     box-sizing: border-box;
 }
 
-/* :root {
-    Variables
-} */
+:root {
+    --colour-page-background: grey;
+    --colour-hover-valid: purple;
+    --colour-hover-invalid: red;
+    --colour-cell-background: white;
+    --colour-miss: blue;
+    --colour-ship-1: #474747;
+    --colour-ship-2: #463838;
+    --colour-ship-3: #3c4638;
+    --colour-ship-4: #433846;
+    --colour-ship-5: #7e6b83;
+    --colour-ship-1-hit: grey;
+    --colour-ship-2-hit: grey;
+    --colour-ship-3-hit: grey;
+    --colour-ship-4-hit: grey;
+    --colour-ship-5-hit: grey;
+    --colour-ships-background: white;
+    --colour-ships-placed: #eee;
+    --colour-ships-destroyed: grey;
+    --colour-ships-placing: orange;
+}
 
 body {
-    background-color: grey;
+    background-color: var(--colour-page-background);
 }
 
 .tile {

@@ -1,87 +1,9 @@
 /**
  * To Do:
- * - Reset button reinitialisation process
  * - CSS Styles
+ * - Computer placement improvements
+ * - Computer guessing improvements
  * - Add ship images to the ship sections
- * - Stage 2 gameplay
- */
-
-// Stage 1: Player places their pieces
-// Initialise empty board
-// Player will hover mouse over the board and it will highlight the cells the boat will go in
-// - for a size 5 boat 5 cells will be highlight
-// Player can right click to rotate the boat
-// Player clicks to place the boat on the board
-// The boat is highlighted to show it is placed (along the bottom)
-// The next boat will be highlighted
-// Player repeats until all boats are placed
-/**
- * Initialisation:
- * game variables:
- * - current turn
- * - winner
- * - game stage (setup or gameplay)
- * - ship types
- *   - used to create the tile class' ship status
- *
- * tile variables:
- * - board/cell status
- *   - null = unselected
- *   - 0 = guessed/missed
- *   - 1 = ship #1 placed
- *   - -1 = ship #1 placed and hit
- * - ship status
- *   - isSunk
- *   -
- *
- */
-//// Board Data:
-// Number to indicate which boat is placed (0=nothing in the cell)
-// +/- to define if the cell has been selected by the opponent
-
-// Initialise the computer board
-// The 'AI' picks its positions for each boat:
-// Pick a random orientation of the boat (horizontal/vertical)
-// Pick a random cell
-// - Validate if the boat can fit (has enough vertical/horizontal space)
-//    - This will check for other boats already placed and the edges of the board
-// Place the next boat until all boats are placed
-
-// Stage 2: guessing
-// - The boats on the player's board will be shown as dots, but hidden on the computer's board
-// Randomise which player goes first
-// When player picks (on the computer board), they click on the board the cell they want to pick
-// - Only allow selecting on the computer board (hover/click on the player board will do nothing)
-// - validate if the cell has been selected already
-// - if it is a hit, highlight red
-// - if it is a miss, highlight blue
-// - if the boat is sunk, highlight grey
-
-// Computer picks, highlights on the player board
-// - Same highlighting rules as above
-
-// After a boat is hit, check if that boat is sunk
-// After a boat is sunk, check if the other player has any boats left.
-// If yes, continue with the game
-// If no, the current player has won
-
-//// Computer cell selection:
-// If the last cell placed was a miss, pick a random cell
-// - validate the cell has not been selected already
-// If the last cell placed was a hit and sink, pick a random cell
-// - validate the cell has not been selected already
-// If the last cell placed was a hit but not a sink:
-// - Pick a cell next to the last placed cell
-//   - If there is a row of cells already hit, pick the next cell in the row
-//   - Need to handle cases where two boats are next to each other (inline or perpendicular)
-
-/**
- * Board design:
- * Columns will be defined by the single digit value of the cell number
- * Rows will be defined by the 10s value of the cell number
- * Eg. cell 23 is column 3, row 2 (with 0 index format)
- * column = cell % 10
- * row = Math.floor(cell / 10)
  */
 
 /** Extension:
@@ -95,45 +17,56 @@ class Cell {
     }
     // prettier-ignore
     static renderLookup = {
-        'null': 'white',
-        '0': 'blue',
-        '1': '#474747',
-        '2': '#463838',
-        '3': '#3c4638',
-        '4': '#433846',
-        '5': '#433846',
-        '-1': 'grey',
-        '-2': 'grey',
-        '-3': 'grey',
-        '-4': 'grey',
-        '-5': 'grey',
+        'null': 'var(--colour-cell-background)',
+        '0': 'var(--colour-miss)',
+        '1': 'var(--colour-ship-1)',
+        '2': 'var(--colour-ship-2)',
+        '3': 'var(--colour-ship-3)',
+        '4': 'var(--colour-ship-4)',
+        '5': 'var(--colour-ship-5)',
+        '-1': 'var(--colour-ship-1-hit)',
+        '-2': 'var(--colour-ship-2-hit)',
+        '-3': 'var(--colour-ship-3-hit)',
+        '-4': 'var(--colour-ship-4-hit)',
+        '-5': 'var(--colour-ship-5-hit)',
+        '-99': 'var(--colour-cell-background)'
     }
 
-    render() {
-        if (this.value !== null) {
+    render(isComputer, gameStage) {
+        // Render ship cells
+        if (!isComputer && this.value !== null) {
             // this.cellElement.innerHTML = '&#x2022;';
         }
-        this.cellElement.style.backgroundColor = Cell.renderLookup[this.value];
+        this.cellElement.style.backgroundColor =
+            'var(--colour-cell-background)';
+        // Render cell background based on cell value
+        if (!isComputer || (isComputer && this.value <= 0) || gameStage === 3) {
+            this.cellElement.style.backgroundColor =
+                Cell.renderLookup[this.value];
+        }
     }
 
-    renderHighlight(valid) {
-        if (valid) {
-            // Render cell to show a ship can go in this cell
-            this.cellElement.style.backgroundColor = '#777';
+    renderHighlight(valid, gameStage) {
+        if (valid || gameStage === 2) {
+            this.cellElement.style.backgroundColor =
+                'var(--colour-hover-valid)';
         } else {
             // Render cell to show a ship cannot be placed in this cell
-            this.cellElement.style.backgroundColor = 'red';
+            this.cellElement.style.backgroundColor =
+                'var(--colour-hover-invalid)';
         }
     }
 }
 
 class playerTile {
-    constructor(playerTileElement) {
+    constructor(playerTileElement, isComputer) {
         // Define sections of the player game tile
+        this.playerTileElement = playerTileElement;
         this.tileHeaderElement =
             playerTileElement.querySelector('.tile-header');
         this.tileBoardElement = playerTileElement.querySelector('.tile-board');
         this.tileShipsElement = playerTileElement.querySelector('.tile-ships');
+        this.isComputer = isComputer;
         this.ships = [
             {
                 id: 1,
@@ -194,19 +127,34 @@ class playerTile {
     render(gameStage) {
         // (after debugging done, dont render ship positions on computer board)
         // Render main cells
-        this.boardCells.forEach((cell) => cell.render());
+        this.boardCells.forEach((cell) =>
+            cell.render(this.isComputer, gameStage)
+        );
+
+        // Hide if game setup in progress
+        if (gameStage < 2 && this.isComputer) {
+            this.playerTileElement.style.display = 'none';
+        } else {
+            this.playerTileElement.style.removeProperty('display');
+        }
 
         // Render ship section
         switch (gameStage) {
             case 0:
             case 1:
                 for (let i = 0; i < this.shipCellsElement.length; i++) {
+                    // Add ship name
                     this.shipCellsElement[
                         i
                     ].innerHTML = `<h4>${this.ships[i].name}</h4>`;
-                    this.shipCellsElement[i].style.removeProperty('border');
+                    // Reset border highlight
+                    this.shipCellsElement[i].style.removeProperty('background');
                     if (this.ships[i].placed) {
-                        this.shipCellsElement[i].style.background = '#EEE';
+                        this.shipCellsElement[i].style.background =
+                            'var(--colour-ships-placed)';
+                    } else {
+                        this.shipCellsElement[i].style.background =
+                            'var(--colour-ships-background)';
                     }
                 }
 
@@ -214,20 +162,24 @@ class playerTile {
                     (ship) => !ship.placed
                 );
                 if (currentShipIndex !== -1) {
-                    this.shipCellsElement[currentShipIndex].style.border =
-                        '1px solid red';
+                    this.shipCellsElement[currentShipIndex].style.background =
+                        'var(--colour-ships-placing)';
                 }
                 break;
             case 2:
                 for (let i = 0; i < this.shipCellsElement.length; i++) {
+                    this.shipCellsElement[i].style.background =
+                        'var(--colour-ships-background)';
                     this.shipCellsElement[
                         i
                     ].innerHTML = `<h4>${this.ships[i].name}</h4>`;
                     this.shipCellsElement[i].style.removeProperty('border');
                     if (this.ships[i].destroyed) {
-                        this.shipCellsElement[i].style.background = 'grey';
+                        this.shipCellsElement[i].style.background =
+                            'var(--colour-ships-destroyed)';
                     } else {
-                        this.shipCellsElement[i].style.background = 'white';
+                        this.shipCellsElement[i].style.background =
+                            'var(--colour-ships-background)';
                     }
                 }
                 break;
@@ -242,10 +194,16 @@ class BattleshipGame {
         this.computerTileElement = game.querySelector('#computer');
         this.buttonResetElement = game.querySelector('#button-reset');
         this.buttonStartElement = game.querySelector('#button-start');
+        this.messageElement = game.querySelector('.message');
 
         // Generate player tiles
-        this.human = new playerTile(this.playerTileElement);
-        this.computer = new playerTile(this.computerTileElement);
+        this.human = new playerTile(this.playerTileElement, false);
+        this.computer = new playerTile(this.computerTileElement, true);
+
+        this.lastEvent = {
+            player: null,
+            computer: null,
+        };
 
         // Initialise listeners
         this.addListeners();
@@ -291,7 +249,7 @@ class BattleshipGame {
             const cell = cells[cellNum];
 
             // If target is not the cells, call the main render again to clear any highlights
-            if (!cell || cell.value !== null || this.winner) {
+            if (!cell || this.winner) {
                 this.render();
                 return;
             }
@@ -378,13 +336,11 @@ class BattleshipGame {
 
             // If target is not the cells, call the main render again to clear any highlights
             this.render();
-            if (!cell || cell.value !== null || this.winner) {
+            if (!cell || this.winner) {
                 return;
             }
-            const valid = this.validateCellGuess(cell);
-            console.log(valid);
 
-            cell.renderHighlight(valid);
+            cell.renderHighlight(this.validateCellGuess(cell), this.gamestage);
         });
 
         // Listener for the click on computer tile
@@ -414,6 +370,7 @@ class BattleshipGame {
             // Validate if there are any ships left
             if (this.validateShips(cells, this.computer.ships)) {
                 // Game is over
+                this.gameStage = 3;
                 this.winner = this.turn;
                 this.render();
                 return;
@@ -423,16 +380,10 @@ class BattleshipGame {
             this.turn *= -1;
             this.render();
 
-            // Call next playercellNum
-            this.computerGuess();
-        });
-    }
-
-    tmpPrintCellValues(playerCells) {
-        playerCells.forEach((cell) => {
-            if (cell.value !== null) {
-                console.log(cell.value);
-            }
+            // Call next playercellNum (delay for dramatic effect)
+            setTimeout(() => {
+                this.computerGuess();
+            }, 1000);
         });
     }
 
@@ -506,7 +457,7 @@ class BattleshipGame {
             ) {
                 availableCells.push(playerCells[endCellIndex + 1]);
             }
-            console.log(availableCells);
+
             if (availableCells.length > 0) {
                 return availableCells[
                     Math.floor(Math.random() * availableCells.length)
@@ -537,6 +488,7 @@ class BattleshipGame {
         // Validate if there are any ships left
         if (this.validateShips(cells, ships)) {
             // Game is over
+            this.gameStage = 3;
             this.winner = this.turn;
             this.render();
             return;
@@ -550,6 +502,7 @@ class BattleshipGame {
     eliminateCells(playerCells, playerShips) {
         // this will automatically mark any cells that cannot fit any of the remaining ships
         // eg, if a cell is surround on all sides, it cannot fit a boat and the computer should not pick from it
+        // It modifies the playerCells object, it does not return anything
     }
     validateShips(playerCells, playerShips) {
         // Check the ships for the given player to see which are sunk
@@ -740,8 +693,38 @@ class BattleshipGame {
         // Control when the start button is visible
         this.renderStartButton();
 
-        // Control when computer tile is visible
-        // this.renderComputerTile();
+        // Render the messages:
+        this.renderMessages();
+    }
+
+    renderMessages() {
+        // Update the message on screen
+        switch (this.gameStage) {
+            case 0:
+                // Placing stage
+                this.messageElement.innerHTML = 'Place your ships';
+                break;
+            case 1:
+                // End of placing stage
+                this.messageElement.innerHTML = 'Press start to begin the game';
+                break;
+            case 2:
+                // Guessing stage
+                if (this.turn === 1) {
+                    // Player's turn
+                    this.messageElement.innerHTML = 'Your turn';
+                } else {
+                    // Computer's turn
+                    this.messageElement.innerHTML =
+                        'Wait for the computer to make its guess';
+                }
+                break;
+            case 3:
+                // The game is over, display the winner
+                this.messageElement.innerHTML =
+                    this.winner === 1 ? 'You won!' : 'You lost!';
+                break;
+        }
     }
 
     renderStartButton() {
@@ -753,16 +736,13 @@ class BattleshipGame {
         }
     }
 
-    renderComputerTile() {
-        // Hide if game setup in progress
-        if (this.gameStage === 2) {
-            this.computerTileElement.style.removeProperty('display');
-        } else {
-            this.computerTileElement.style.display = 'none';
-        }
-    }
+    reinitialise() {
+        // Prepare the environment for a new game
+        this.human = new playerTile(this.playerTileElement, false);
+        this.computer = new playerTile(this.computerTileElement, true);
 
-    reinitialise() {}
+        this.play();
+    }
 }
 
 function initialise() {
