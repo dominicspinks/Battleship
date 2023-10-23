@@ -1,6 +1,7 @@
 /**
  * To Do:
  * - CSS Styles
+ *   - Control player boards in mobile view (until the tiles are displayed side by side)
  * - Computer placement improvements
  * - Computer guessing improvements
  * - Add ship images to the ship sections
@@ -146,7 +147,7 @@ class playerTile {
                     // Add ship name
                     this.shipCellsElement[
                         i
-                    ].innerHTML = `<h4>${this.ships[i].name}</h4>`;
+                    ].innerHTML = `<p>${this.ships[i].name}</p>`;
                     // Reset border highlight
                     this.shipCellsElement[i].style.removeProperty('background');
                     if (this.ships[i].placed) {
@@ -172,7 +173,7 @@ class playerTile {
                         'var(--colour-ships-background)';
                     this.shipCellsElement[
                         i
-                    ].innerHTML = `<h4>${this.ships[i].name}</h4>`;
+                    ].innerHTML = `<p>${this.ships[i].name}</p>`;
                     this.shipCellsElement[i].style.removeProperty('border');
                     if (this.ships[i].destroyed) {
                         this.shipCellsElement[i].style.background =
@@ -233,6 +234,9 @@ class BattleshipGame {
             // Clicking will begin stage 2 of the game
             this.gameStage = 2;
             this.render();
+
+            // Cycle the displayed tiles based on the current player
+            this.hideTiles();
         });
 
         // Listener for the hover on player tile
@@ -376,26 +380,38 @@ class BattleshipGame {
                 return;
             }
 
-            // Change player turn
-            this.turn *= -1;
             this.render();
 
-            // Call next playercellNum (delay for dramatic effect)
+            // Change player turn
+            this.changePlayer();
+
+            // Call next player (delay for dramatic effect)
             setTimeout(() => {
                 this.computerGuess();
             }, 1000);
         });
     }
 
-    getComputerGuess(playerCells, playerShips) {
-        // for each ship id of non destroyed ships, count the number of times its negative appears in the playerCells
-        // If all are 0, make a random guess
-        // If one is less than the size of the boat, determine the next guess based on that cell
-        // - if the count is one, make a random selection either up/down/left/right from that cell
-        //   - This will take into account the other positions on the board (only null cells and checking for edges of the board)
-        // - if the count is 2 or more, use the existing values to determine the ship's orientation (or should I just use the orientation value?)
-        // - Make the guess on the next horizontal/vertical cell based on the orientation
+    changePlayer() {
+        // Change player turn
+        this.turn *= -1;
+        this.hideTiles();
+    }
 
+    hideTiles() {
+        // This is to handle which tile is displayed on screen for small displays
+        if (this.turn === 1) {
+            // Players turn , hide player tile
+            this.human.playerTileElement.classList.add('hide-tile');
+            this.computer.playerTileElement.classList.remove('hide-tile');
+        } else {
+            // Computer's turn, hide computer tile
+            this.human.playerTileElement.classList.remove('hide-tile');
+            this.computer.playerTileElement.classList.add('hide-tile');
+        }
+    }
+
+    getComputerGuess(playerCells, playerShips) {
         // Ignore ships that are already destroyed
         for (let ship of playerShips.filter((ship) => !ship.destroyed)) {
             // Find ships that have been partially destroyed
@@ -494,9 +510,10 @@ class BattleshipGame {
             return;
         }
 
-        // Change player turn
-        this.turn *= -1;
         this.render();
+
+        // Change player turn
+        this.changePlayer();
     }
 
     eliminateCells(playerCells, playerShips) {

@@ -22,28 +22,75 @@
     --colour-ships-placed: #eee;
     --colour-ships-destroyed: grey;
     --colour-ships-placing: orange;
+    --colour-tile-background: white;
+    --colour-tile-header-background: white;
+
+    --font-title: 'Exo 2';
+    --font-buttons: 'Exo 2';
+    --font-message: 'Exo 2';
+    --font-ships: 'Exo 2';
+    --font-tileheader: 'Exo 2';
 }
 
 body {
     background-color: var(--colour-page-background);
 }
 
+main {
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.title {
+    margin: 0 auto;
+    font-size: 8vmin;
+    font-family: var(--font-title);
+}
+
+.message {
+    margin: 0 auto;
+    font-size: 5vmin;
+    font-family: var(--font-message);
+}
+
+.tiles {
+    display: flex;
+    flex-direction: column;
+}
+
 .tile {
-    width: 40vmin;
-    height: 48vmin;
+    width: 90vmin;
+    height: 108vmin;
     display: grid;
     gap: 5px;
     background-color: white;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 10fr 1fr;
     border: 2px solid black;
-    margin: 10px;
+    margin: 10px auto;
     padding: 5px;
 }
 
 .tile-header {
+    display: flex;
     border: 2px solid black;
     color: #433846;
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.tile-header > h3 {
+    font-size: 4vmin;
+    font-family: var(--font-tileheader);
+    text-align: center;
+    margin: 0 auto;
 }
 
 .tile-board {
@@ -69,6 +116,95 @@ body {
 }
 
 .tile-ships > div {
+    display: flex;
+    flex-direction: column;
     border: 1px solid black;
-    font-size: 1.5vmin;
+    text-transform: uppercase;
+    justify-content: center;
+    align-items: center;
+}
+
+.tile-ships > div > p {
+    font-size: 2.5vmin;
+    text-align: center;
+    font-family: var(--font-ships);
+    margin: 0;
+}
+
+.button-div {
+    margin: 5px auto;
+}
+
+.button {
+    width: 20vmin;
+    height: 8vmin;
+    font-size: 3.8vmin;
+    font-family: var(--font-buttons);
+}
+
+.hide-tile {
+    display: none;
+}
+
+@media (min-width: 600px) {
+    .title {
+        font-size: 48px;
+    }
+
+    .message {
+        font-size: 30px;
+    }
+
+    .tile {
+        max-width: 540px;
+        max-height: 648px;
+    }
+
+    .tile-header > h3 {
+        font-size: 24px;
+    }
+
+    .tile-ships > div > p {
+        font-size: 15px;
+    }
+
+    .button {
+        width: 120px;
+        height: 48px;
+        font-size: 23px;
+    }
+}
+
+@media (min-width: 960px) {
+    .tiles {
+        flex-direction: row;
+        gap: 30px;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .tile {
+        max-width: none;
+        max-height: none;
+        width: 35vmin;
+        height: 42vmin;
+    }
+
+    .tile-header > h3 {
+        font-size: 2vmin;
+    }
+
+    .tile-ships > div > p {
+        font-size: 1vmin;
+    }
+
+    .button {
+        width: 10vmin;
+        height: 4vmin;
+        font-size: 2vmin;
+    }
+
+    .hide-tile {
+        display: grid;
+    }
 }
