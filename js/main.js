@@ -369,7 +369,10 @@ class BattleshipGame {
             }
 
             // Update selected cell
-            this.makeGuess(cell);
+            const guessStatus = this.makeGuess(cell);
+            this.render();
+            console.log(guessStatus);
+            this.renderMessages(guessStatus);
 
             // Validate if there are any ships left
             if (this.validateShips(cells, this.computer.ships)) {
@@ -380,22 +383,35 @@ class BattleshipGame {
                 return;
             }
 
-            this.render();
-
             // Change player turn
             this.changePlayer();
 
+            // Render next player message
+            setTimeout(() => {
+                this.renderMessages();
+                this.hideTiles();
+            }, 1500);
             // Call next player (delay for dramatic effect)
             setTimeout(() => {
                 this.computerGuess();
-            }, 1000);
+            }, 3000);
+        });
+    }
+
+    tmpPrintValues() {
+        this.human.boardCells.forEach((cell) => {
+            if (cell.value !== null) {
+                console.log(
+                    this.human.boardCells.findIndex((cell1) => cell1 === cell),
+                    cell.value
+                );
+            }
         });
     }
 
     changePlayer() {
         // Change player turn
         this.turn *= -1;
-        this.hideTiles();
     }
 
     hideTiles() {
@@ -427,9 +443,10 @@ class BattleshipGame {
             const endCellIndex = playerCells.findIndex(
                 (cell) => cell === hitCells[hitCells.length - 1]
             );
+
             // Create an array of the cells the computer can pick from
             const availableCells = [];
-            // If hitCells > 1, the computer know what the orientation is
+            // If hitCells > 1, the computer knows what the orientation is
             // eg if it is vertical, it only guesses from above or below
             // Check in the row above
             if (
@@ -441,6 +458,7 @@ class BattleshipGame {
             ) {
                 availableCells.push(playerCells[startCellIndex - 10]);
             }
+
             // Check in the row below
             if (
                 (hitCells.length === 1 ||
@@ -451,6 +469,7 @@ class BattleshipGame {
             ) {
                 availableCells.push(playerCells[endCellIndex + 10]);
             }
+
             // Check in the column to the left
             if (
                 (hitCells.length === 1 ||
@@ -462,6 +481,7 @@ class BattleshipGame {
             ) {
                 availableCells.push(playerCells[startCellIndex - 1]);
             }
+
             // Check in the column to the right
             if (
                 (hitCells.length === 1 ||
@@ -499,7 +519,9 @@ class BattleshipGame {
         const cell = this.getComputerGuess(cells, ships);
 
         // Update selected cell
-        this.makeGuess(cell);
+        const guessStatus = this.makeGuess(cell);
+        this.render();
+        this.renderMessages(guessStatus);
 
         // Validate if there are any ships left
         if (this.validateShips(cells, ships)) {
@@ -510,17 +532,122 @@ class BattleshipGame {
             return;
         }
 
-        this.render();
-
         // Change player turn
         this.changePlayer();
+
+        // Render next player message
+        setTimeout(() => {
+            this.renderMessages();
+            this.hideTiles();
+        }, 1500);
+
+        // // Switch visible tiles
+        // setTimeout(() => {
+        // }, 3000);
     }
 
     eliminateCells(playerCells, playerShips) {
         // this will automatically mark any cells that cannot fit any of the remaining ships
         // eg, if a cell is surround on all sides, it cannot fit a boat and the computer should not pick from it
         // It modifies the playerCells object, it does not return anything
+
+        // Get minimum length of ship remaining
+        let minShipLength = playerShips[0].size;
+        playerShips.forEach((ship) => {
+            if (ship.size < minShipLength && !ship.destroyed) {
+                minShipLength = ship.size;
+            }
+        });
+
+        for (let cellIndex = 0; cellIndex < playerCells.length; cellIndex++) {
+            // Skip cell if it already has a guess or elimination applied
+            if (
+                playerCells[cellIndex].value !== null &&
+                playerCells[cellIndex].value <= 0
+            ) {
+                continue;
+            }
+
+            // Check left
+            let spacesLeft = 0;
+            for (let i = 1; i <= minShipLength; i++) {
+                if (
+                    cellIndex - i >= 0 &&
+                    (cellIndex - i) % 10 < cellIndex % 10 &&
+                    (playerCells[cellIndex - i].value === null ||
+                        playerCells[cellIndex - i].value > 0)
+                ) {
+                    spacesLeft++;
+                } else {
+                    break;
+                }
+            }
+            // If there are enough spaces to fit a ship, continue to the next cell
+            if (1 + spacesLeft >= minShipLength) {
+                continue;
+            }
+
+            // Check right
+            let spacesRight = 0;
+            for (let i = 1; i <= minShipLength; i++) {
+                if (
+                    cellIndex + i < 100 &&
+                    (cellIndex + i) % 10 > cellIndex % 10 &&
+                    (playerCells[cellIndex + i].value === null ||
+                        playerCells[cellIndex + i].value > 0)
+                ) {
+                    spacesRight++;
+                } else {
+                    break;
+                }
+            }
+            // If there are enough spaces to fit a ship, continue to the next cell
+            console.log(`Left ${spacesLeft}, Right: ${spacesRight}`);
+            if (1 + spacesLeft + spacesRight >= minShipLength) {
+                continue;
+            }
+
+            // Check up
+            let spacesUp = 0;
+            for (let i = 1; i <= minShipLength; i++) {
+                if (
+                    cellIndex - i * 10 >= 0 &&
+                    (playerCells[cellIndex - i * 10].value === null ||
+                        playerCells[cellIndex - i * 10].value > 0)
+                ) {
+                    spacesUp++;
+                } else {
+                    break;
+                }
+            }
+            // If there are enough spaces to fit a ship, continue to the next cell
+            if (1 + spacesUp >= minShipLength) {
+                continue;
+            }
+
+            // Check down
+            let spacesDown = 0;
+            for (let i = 1; i <= minShipLength; i++) {
+                if (
+                    cellIndex + i * 10 < 100 &&
+                    (playerCells[cellIndex + i * 10].value === null ||
+                        playerCells[cellIndex + i * 10].value > 0)
+                ) {
+                    spacesDown++;
+                } else {
+                    break;
+                }
+            }
+            // If there are enough spaces to fit a ship, continue to the next cell
+            if (1 + spacesUp + spacesDown >= minShipLength) {
+                continue;
+            }
+
+            // All validations failed, update playerCells
+            playerCells[cellIndex].value = -99;
+        }
     }
+
     validateShips(playerCells, playerShips) {
         // Check the ships for the given player to see which are sunk
         playerShips.forEach((ship) => {
@@ -554,7 +681,6 @@ class BattleshipGame {
             cellGuess.value *= -1;
             return true;
         }
-        return false;
     }
 
     validateCellGuess(cell) {
@@ -633,7 +759,7 @@ class BattleshipGame {
                 ) {
                     break;
                 }
-                cellNum += 23;
+                cellNum += 33;
                 if (cellNum > 99) {
                     cellNum -= 100;
                 }
@@ -714,7 +840,7 @@ class BattleshipGame {
         this.renderMessages();
     }
 
-    renderMessages() {
+    renderMessages(hitState) {
         // Update the message on screen
         switch (this.gameStage) {
             case 0:
@@ -727,13 +853,32 @@ class BattleshipGame {
                 break;
             case 2:
                 // Guessing stage
-                if (this.turn === 1) {
-                    // Player's turn
-                    this.messageElement.innerHTML = 'Your turn';
+                console.log(hitState);
+                if (typeof hitState === 'undefined') {
+                    if (this.turn === 1) {
+                        // Player's turn
+                        this.messageElement.innerHTML = 'Your turn';
+                    } else {
+                        // Computer's turn
+                        this.messageElement.innerHTML = "Computer's turn";
+                    }
                 } else {
-                    // Computer's turn
-                    this.messageElement.innerHTML =
-                        'Wait for the computer to make its guess';
+                    if (this.turn === 1) {
+                        // Player's turn
+                        if (hitState) {
+                            this.messageElement.innerHTML =
+                                'Your turn <span>HIT!</span>';
+                        } else {
+                            this.messageElement.innerHTML =
+                                'Your turn <span>MISS!</span>';
+                        }
+                        console.log(this.messageElement.innerHTML);
+                    } else {
+                        // Computer's turn
+                        this.messageElement.innerHTML = hitState
+                            ? "Computer's turn <span>HIT!</span>"
+                            : "Computer's turn <span>MISS!</span>";
+                    }
                 }
                 break;
             case 3:

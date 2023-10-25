@@ -69,7 +69,7 @@ header {
     height: 108vmin;
     display: grid;
     gap: 5px;
-    background-color: white;
+    background-color: var(--colour-tile-background);
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 10fr 1fr;
     border: 2px solid black;
@@ -80,6 +80,7 @@ header {
 .tile-header {
     display: flex;
     border: 2px solid black;
+    background: var(--colour-tile-header-background);
     color: #433846;
     padding: 5px;
     justify-content: center;
