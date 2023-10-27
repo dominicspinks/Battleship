@@ -3,6 +3,22 @@
 Battleship is a classic two-player strategic board game that simulates naval warfare.
 The objective of the game is to locate and sink all of your opponent's ships before they do the same to yours.
 
+## Getting Started
+
+[Click here](https://dominicspinks.github.io/Battleship/) to play Battleships for yourself.
+
+Battleship Instructions:
+
+-   Begin by placing each ship in the grid.
+    -   You can rotate your ship with a right click (tap and hold for mobile).
+    -   If you change your mind, hit the reset button to start over.
+-   The computer's ships will be placed automatically
+-   Once all ships are placed, hit the start button to begin
+    -   You will go first, select a cell in the computer's board to make your shot.
+    -   If it is a hit, try to sink the ship in your next turn.
+    -   The computer will take its turn next.
+-   Continue until one player has sunk all of their opponents ships
+
 ## Screenshots
 
 Ship placement pages:
@@ -29,22 +45,6 @@ End of game:
 -   HTML
 -   CSS
 -   JavaScript
-
-## Getting Started
-
-[Click here](https://dominicspinks.github.io/Battleship/) to play Battleships for yourself.
-
-Battleship Instructions:
-
--   Begin by placing each ship in the grid.
-    -   You can rotate your ship with a right click (tap and hold for mobile).
-    -   If you change your mind, hit the reset button to start over.
--   The computer's ships will be placed automatically
--   Once all ships are placed, hit the start button to begin
-    -   You will go first, select a cell in the computer's board to make your shot.
-    -   If it is a hit, try to sink the ship in your next turn.
-    -   The computer will take its turn next.
--   Continue until one player has sunk all of their opponents ships
 
 ## Next Steps
 
