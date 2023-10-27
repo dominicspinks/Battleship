@@ -7,8 +7,7 @@ The objective of the game is to locate and sink all of your opponent's ships bef
 
 Ship placement pages
 
-<img src="./resources/Screenshot-pageload.png" alt="Ship Placement Screen" width="200"/>
-<img src="./resources/Screenshot-shipsplaced.png" alt="Ship Placement Screen" width="200"/>
+<img src="./resources/Screenshot-pageload.png" alt="Ship Placement Screen" width="200"/> <img src="./resources/Screenshot-shipsplaced.png" alt="Ship Placement Screen" width="200"/>
 <br>
 <br>
 Player to start guessing
