@@ -3,27 +3,26 @@
 }
 
 :root {
-    --colour-page-background: grey;
-    --colour-hover-valid: purple;
+    --colour-page-background: #546a7b;
+    --colour-hover-valid: #8a3c9c;
     --colour-hover-invalid: red;
-    --colour-cell-background: white;
-    --colour-miss: blue;
-    --colour-ship-1: #474747;
-    --colour-ship-2: #463838;
-    --colour-ship-3: #3c4638;
-    --colour-ship-4: #433846;
-    --colour-ship-5: #7e6b83;
-    --colour-ship-1-hit: grey;
-    --colour-ship-2-hit: grey;
-    --colour-ship-3-hit: grey;
-    --colour-ship-4-hit: grey;
-    --colour-ship-5-hit: grey;
+    --colour-cell-background: rgb(231, 231, 231);
+    --colour-miss: rgb(24, 108, 173);
+    --colour-ship-1: #566e3d;
+    --colour-ship-2: #9bc53d;
+    --colour-ship-3: #bc57bb;
+    --colour-ship-4: #db7f42;
+    --colour-ship-5: #c49e9e;
+    --colour-ship-hit: rgb(206, 45, 0);
+    --colour-ship-destroyed: rgb(75, 75, 75);
     --colour-ships-background: white;
     --colour-ships-placed: #eee;
     --colour-ships-destroyed: grey;
     --colour-ships-placing: orange;
+    --colour-title: white;
+    --colour-message: white;
     --colour-tile-background: white;
-    --colour-tile-header-background: white;
+    --colour-tile-header-background: rgb(218, 218, 218);
 
     --font-title: 'Exo 2';
     --font-buttons: 'Exo 2';
@@ -51,17 +50,26 @@ header {
     margin: 0 auto;
     font-size: 8vmin;
     font-family: var(--font-title);
+    color: var(--colour-title);
+}
+
+.messages {
+    margin: 0 auto;
+    height: 12vmin;
+    color: var(--colour-message);
 }
 
 .message {
-    margin: 0 auto;
     font-size: 5vmin;
     font-family: var(--font-message);
+    margin: 0 auto;
+    text-align: center;
 }
 
 .tiles {
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 }
 
 .tile {
@@ -126,7 +134,7 @@ header {
 }
 
 .tile-ships > div > p {
-    font-size: 2.5vmin;
+    font-size: 2vmin;
     text-align: center;
     font-family: var(--font-ships);
     margin: 0;
@@ -141,6 +149,7 @@ header {
     height: 8vmin;
     font-size: 3.8vmin;
     font-family: var(--font-buttons);
+    cursor: pointer;
 }
 
 .hide-tile {
@@ -152,8 +161,16 @@ header {
         font-size: 48px;
     }
 
+    .messages {
+        height: 72px;
+    }
+
     .message {
         font-size: 30px;
+    }
+
+    .message > span {
+        font-weight: bold;
     }
 
     .tile {
@@ -166,7 +183,7 @@ header {
     }
 
     .tile-ships > div > p {
-        font-size: 15px;
+        font-size: 12px;
     }
 
     .button {
@@ -196,7 +213,7 @@ header {
     }
 
     .tile-ships > div > p {
-        font-size: 1vmin;
+        font-size: 0.8vmin;
     }
 
     .button {

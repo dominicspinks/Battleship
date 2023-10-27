@@ -1,13 +1,3 @@
-/**
- * To Do:
- * - Add ship images to the ship sections
- * - Update sunk ships with different colours
- */
-
-/** Extension:
- * Add option to play with 'Salvos' rules
- */
-
 class Cell {
     constructor(cellElement) {
         this.cellElement = cellElement;
@@ -23,23 +13,34 @@ class Cell {
         '3': 'var(--colour-ship-3)',
         '4': 'var(--colour-ship-4)',
         '5': 'var(--colour-ship-5)',
-        '-1': 'var(--colour-ship-1-hit)',
-        '-2': 'var(--colour-ship-2-hit)',
-        '-3': 'var(--colour-ship-3-hit)',
-        '-4': 'var(--colour-ship-4-hit)',
-        '-5': 'var(--colour-ship-5-hit)',
+        '-1': 'var(--colour-ship-hit)',
+        '-2': 'var(--colour-ship-hit)',
+        '-3': 'var(--colour-ship-hit)',
+        '-4': 'var(--colour-ship-hit)',
+        '-5': 'var(--colour-ship-hit)',
         '-99': 'var(--colour-cell-background)'
     }
 
-    render(isComputer, gameStage) {
+    render(isComputer, gameStage, ships) {
         // Reset cell background colour
         this.cellElement.style.backgroundColor =
             'var(--colour-cell-background)';
 
+        const a = ships.filter(
+            (ship) => ship.id === Math.abs(this.value)
+        ).destroyed;
         // Render cell background based on cell value
         if (!isComputer || (isComputer && this.value <= 0) || gameStage === 3) {
-            this.cellElement.style.backgroundColor =
-                Cell.renderLookup[this.value];
+            const curShip = ships.filter(
+                (ship) => ship.id === Math.abs(this.value)
+            );
+            if (curShip.length > 0 && curShip[0].destroyed) {
+                this.cellElement.style.backgroundColor =
+                    'var(--colour-ship-destroyed)';
+            } else {
+                this.cellElement.style.backgroundColor =
+                    Cell.renderLookup[this.value];
+            }
         }
     }
 
@@ -124,7 +125,7 @@ class playerTile {
     render(gameStage) {
         // Render main cells
         this.boardCells.forEach((cell) =>
-            cell.render(this.isComputer, gameStage)
+            cell.render(this.isComputer, gameStage, this.ships)
         );
 
         // Hide if game setup in progress
@@ -143,7 +144,7 @@ class playerTile {
                     // Add ship name
                     this.shipCellsElement[
                         i
-                    ].innerHTML = `<p>${this.ships[i].name}</p>`;
+                    ].innerHTML = `<p>${this.ships[i].name} - ${this.ships[i].size}</p>`;
                     // Reset border highlight
                     this.shipCellsElement[i].style.removeProperty('background');
                     if (this.ships[i].placed) {
@@ -171,7 +172,7 @@ class playerTile {
                         'var(--colour-ships-background)';
                     this.shipCellsElement[
                         i
-                    ].innerHTML = `<p>${this.ships[i].name}</p>`;
+                    ].innerHTML = `<p>${this.ships[i].name} - ${this.ships[i].size}</p>`;
                     this.shipCellsElement[i].style.removeProperty('border');
                     if (this.ships[i].destroyed) {
                         this.shipCellsElement[i].style.background =
@@ -194,6 +195,7 @@ class BattleshipGame {
         this.buttonResetElement = game.querySelector('#button-reset');
         this.buttonStartElement = game.querySelector('#button-start');
         this.messageElement = game.querySelector('.message');
+        this.message2Element = game.querySelector('.message2');
 
         // Generate player tiles
         this.human = new playerTile(this.playerTileElement, false);
@@ -814,19 +816,20 @@ class BattleshipGame {
         switch (this.gameStage) {
             case 0:
                 // Placing stage
-                this.messageElement.innerHTML = 'Place your ships';
+                this.messageElement.innerHTML =
+                    'Place your ships on the board. <br>Right click to rotate';
                 break;
             case 1:
                 // End of placing stage
-                this.messageElement.innerHTML = 'Press start to begin the game';
+                this.messageElement.innerHTML =
+                    'Press start to begin the game<br>';
                 break;
             case 2:
                 // Guessing stage
                 if (typeof hitState === 'undefined') {
                     if (this.turn === 1) {
                         // Player's turn
-                        this.messageElement.innerHTML =
-                            'Your turn. Make a guess in the computer board';
+                        this.messageElement.innerHTML = 'Your turn';
                         break;
                     } else {
                         // Computer's turn
@@ -837,22 +840,26 @@ class BattleshipGame {
                 if (this.turn === 1) {
                     // Player's turn
                     if (hitState) {
-                        this.messageElement.innerHTML = '<span>HIT!</span>';
+                        this.messageElement.innerHTML =
+                            'Your turn<br><span>HIT!</span>';
                         break;
                     } else {
-                        this.messageElement.innerHTML = '<span>MISS!</span>';
+                        this.messageElement.innerHTML =
+                            'Your turn<br><span>MISS!</span>';
                         break;
                     }
                 }
                 // Computer's turn
                 this.messageElement.innerHTML = hitState
-                    ? "Computer's turn <span>HIT!</span>"
-                    : "Computer's turn <span>MISS!</span>";
+                    ? "Computer's turn<br><span>HIT!</span>"
+                    : "Computer's turn<br><span>MISS!</span>";
                 break;
             case 3:
                 // The game is over, display the winner
                 this.messageElement.innerHTML =
-                    this.winner === 1 ? 'You won!' : 'You lost!';
+                    this.winner === 1
+                        ? '<span>YOU WIN!</span>'
+                        : '<span>YOU LOSE!</span>';
                 break;
         }
     }
