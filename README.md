@@ -9,7 +9,7 @@ The objective of the game is to locate and sink all of your opponent's ships bef
 
 Battleship Instructions:
 
--   Begin by placing each ship in the grid.
+-   Begin by placing each ship in your grid.
     -   You can rotate your ship with a right click (tap and hold for mobile).
     -   If you change your mind, hit the reset button to start over.
 -   The computer's ships will be placed automatically
@@ -17,27 +17,23 @@ Battleship Instructions:
     -   You will go first, select a cell in the computer's board to make your shot.
     -   If it is a hit, try to sink the ship in your next turn.
     -   The computer will take its turn next.
--   Continue until one player has sunk all of their opponents ships
+-   Play continues until one player has sunk all of their opponents ships
 
 ## Screenshots
 
-Ship placement pages:
-
+Ship placement pages:<br>
 <img src="./resources/Screenshot-pageload.png" alt="Ship Placement Screen" width="200"/> <img src="./resources/Screenshot-shipsplaced.png" alt="Ship Placement Screen" width="200"/>
 <br>
 <br>
-Player to start guessing:
-
+Player to start guessing:<br>
 <img src="./resources/Screenshot-startguessing.png" alt="Guessing Screen" width="400"/>
 <br>
 <br>
-Sinking a ship:
-
+Sinking a ship:<br>
 <img src="./resources/Screenshot-sink.png" alt="Sink Ship Screen" width="400"/>
 <br>
 <br>
-End of game:
-
+End of game:<br>
 <img src="./resources/Screenshot-win.png" alt="Win Screen" width="400"/>
 
 ## Technologies Used
@@ -50,9 +46,11 @@ End of game:
 
 Future enhancements for the game:
 
--   Add support for 'Salvos' rules
+-   Add support for "Salvo's" rules
     -   This allows the player to make multiple guesses simultaneously, depending on the number ships remaining
 -   Add scoring to track winners over multiple games
 -   Add animations to the hit and miss events
 -   Improve AI guessing and ship placements
+-   Add difficulty options to control the AI's guessing strategy
 -   Optimise for mobile
+-   Render ships in the cells instead of colours
