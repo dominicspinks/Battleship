@@ -3,19 +3,25 @@
 Battleship is a classic two-player strategic board game that simulates naval warfare.
 The objective of the game is to locate and sink all of your opponent's ships before they do the same to yours.
 
-<section>
-<span>
-<img src="./resources/Sample-physicalgame.jpg" alt="Ship Placement Screen" height="200"/>
+   <section style="font-size: 0.7em; display: flex;gap: 10px;">
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+            <img src="./resources/Sample-physicalgame.jpg" alt="Ship Placement Screen" height="300" />
+            <span>By <a href="//commons.wikimedia.org/wiki/User:Sevela.p" title="User:Sevela.p">Pavel Ševela</a>,
+                <a href="https://creativecommons.org/licenses/by-sa/3.0"
+                    title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a
+                    href="https://commons.wikimedia.org/w/index.php?curid=18331432">Link</a></span>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+            <img src="./resources/Sample-papergame.jpg" alt="Ship Placement Screen" height="300" />
+            <span>By <a
+                    href="//commons.wikimedia.org/w/index.php?title=User:Sbednar&amp;amp;action=edit&amp;amp;redlink=1"
+                    class="new" title="User:Sbednar (page does not exist)">Sbednar</a> - <span class="int-own-work"
+                    lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0"
+                    title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a
+                    href="https://commons.wikimedia.org/w/index.php?curid=15488396">Link</a></span>
+        </div>
 
-By <a href="//commons.wikimedia.org/wiki/User:Sevela.p" title="User:Sevela.p">Pavel Ševela</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=18331432">Link</a>
-
-</span><span>
-<img src="./resources/Sample-papergame.jpg" alt="Ship Placement Screen" height="200"/>
-
-By <a href="//commons.wikimedia.org/w/index.php?title=User:Sbednar&amp;amp;action=edit&amp;amp;redlink=1" class="new" title="User:Sbednar (page does not exist)">Sbednar</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=15488396">Link</a>
-</span>
-
-</section>
+    </section>
 
 ## Getting Started
 
