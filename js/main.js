@@ -883,10 +883,10 @@ class BattleshipGame {
     }
 
     reinitialise() {
-        // Stop existing timeouts if in progress
-        this.timeoutIDs.forEach((id) => {
-            clearTimeout(id);
-        });
+        // Stop any existing timeouts if in progress
+        for (let i = this.timeoutIDs.length; i > 0; i--) {
+            clearTimeout(this.timeoutIDs.pop());
+        }
 
         // Prepare the environment for a new game
         this.human = new playerTile(this.playerTileElement, false);
