@@ -20,7 +20,6 @@ The objective of the game is to locate and sink all of your opponent's ships bef
                     title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a
                     href="https://commons.wikimedia.org/w/index.php?curid=15488396">Link</a></span>
         </div>
-
     </section>
 
 ## Getting Started
