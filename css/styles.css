@@ -33,11 +33,15 @@
 
 body {
     background-color: var(--colour-page-background);
+    -webkit-tap-highlight-color: transparent;
 }
 
 main {
     display: flex;
     flex-direction: column;
+    margin: 0 auto;
+    position: absolute;
+    left: 0;
 }
 
 header {
@@ -70,11 +74,12 @@ header {
     display: flex;
     flex-direction: column;
     cursor: pointer;
+    margin: 0 auto;
 }
 
 .tile {
-    width: 90vmin;
-    height: 108vmin;
+    width: 100vmin;
+    height: 120vmin;
     display: grid;
     gap: 5px;
     background-color: var(--colour-tile-background);
@@ -145,7 +150,7 @@ header {
 }
 
 .button {
-    width: 20vmin;
+    width: 100vmin;
     height: 8vmin;
     font-size: 3.8vmin;
     font-family: var(--font-buttons);
@@ -156,7 +161,12 @@ header {
     display: none;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 520px) {
+    main {
+        position: static;
+        left: auto;
+    }
+
     .title {
         font-size: 48px;
     }
@@ -174,8 +184,8 @@ header {
     }
 
     .tile {
-        max-width: 540px;
-        max-height: 648px;
+        max-width: 460px;
+        max-height: 552px;
     }
 
     .tile-header > h3 {
@@ -204,8 +214,8 @@ header {
     .tile {
         max-width: none;
         max-height: none;
-        width: 35vmin;
-        height: 42vmin;
+        width: 50vmin;
+        height: 60vmin;
     }
 
     .tile-header > h3 {
@@ -213,7 +223,7 @@ header {
     }
 
     .tile-ships > div > p {
-        font-size: 0.8vmin;
+        font-size: 1.2vmin;
     }
 
     .button {

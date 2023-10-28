@@ -204,6 +204,9 @@ class BattleshipGame {
         // Time in ms for message update delay
         this.renderDelay = 1000;
 
+        // Track timeouts so they can be cleared upon game reset
+        this.timeoutIDs = [];
+
         // Initialise listeners
         this.addListeners();
     }
@@ -261,8 +264,8 @@ class BattleshipGame {
 
         // Listener for the click on player tile
         this.playerTileElement.addEventListener('click', (event) => {
-            event.preventDefault();
             event.stopImmediatePropagation();
+            event.preventDefault();
             // If the game is in stage 1, 2 or 3, the playerTileElement cannot be clicked
             if (this.gameStage !== 0) {
                 return;
@@ -381,15 +384,19 @@ class BattleshipGame {
             this.turn *= -1;
 
             // Render next player message
-            setTimeout(() => {
-                this.renderMessages();
-                this.hideTiles();
-            }, this.renderDelay);
+            this.timeoutIDs.push(
+                setTimeout(() => {
+                    this.renderMessages();
+                    this.hideTiles();
+                }, this.renderDelay)
+            );
 
             // Call next player
-            setTimeout(() => {
-                this.computerGuess();
-            }, this.renderDelay * 1.5);
+            this.timeoutIDs.push(
+                setTimeout(() => {
+                    this.computerGuess();
+                }, this.renderDelay * 1.5)
+            );
         });
     }
 
@@ -516,10 +523,12 @@ class BattleshipGame {
         this.turn *= -1;
 
         // Render next player message
-        setTimeout(() => {
-            this.renderMessages();
-            this.hideTiles();
-        }, this.renderDelay * 1.5);
+        this.timeoutIDs.push(
+            setTimeout(() => {
+                this.renderMessages();
+                this.hideTiles();
+            }, this.renderDelay * 1.5)
+        );
     }
 
     eliminateCells(playerCells, playerShips) {
@@ -874,9 +883,15 @@ class BattleshipGame {
     }
 
     reinitialise() {
+        // Stop existing timeouts if in progress
+        this.timeoutIDs.forEach((id) => {
+            clearTimeout(id);
+        });
+
         // Prepare the environment for a new game
         this.human = new playerTile(this.playerTileElement, false);
         this.computer = new playerTile(this.computerTileElement, true);
+
         this.computer.playerTileElement.classList.remove('hide-tile');
         this.human.playerTileElement.classList.remove('hide-tile');
 
