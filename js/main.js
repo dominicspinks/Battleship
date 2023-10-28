@@ -278,7 +278,8 @@ class BattleshipGame {
             if (!cell || cell.value !== null) {
                 return;
             }
-
+            // Eliminate cells that are impossible to fit a boat
+            this.eliminateCells(playerCells, playerShips);
             // Get current ship
             const ship = this.getCurrentShip(this.human.ships);
 
@@ -635,7 +636,6 @@ class BattleshipGame {
     validateShips(playerCells, playerShips) {
         // Check the ships for the given player to see which are sunk
         playerShips.forEach((ship) => {
-            // this.tmpPrintCellValues(playerCells);
             if (
                 playerCells.findIndex((cell) => cell.value === +ship.id) === -1
             ) {
