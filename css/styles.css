@@ -214,8 +214,8 @@ header {
     .tile {
         max-width: none;
         max-height: none;
-        width: 50vmin;
-        height: 60vmin;
+        width: 45vmin;
+        height: 54vmin;
     }
 
     .tile-header > h3 {
